@@ -1,3 +1,5 @@
+![Menu do Sistema](./screenshot.png)
+
 # 🍰 Doce Inclusão - Gestão Culinária e Custos (MVP)
 
 O **Doce Inclusão** é um Web App desenvolvido sob medida para o projeto culinário da **APAE de Gravataí/RS**. A ferramenta digitaliza o processo de planejamento alimentar, transformando controles manuais em um sistema automatizado de cálculos e logística.
