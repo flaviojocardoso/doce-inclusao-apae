@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Doce Inclusão</title>
+  <link rel="manifest" href="manifest.json">
+  
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <style>
+    :root{
+      --bg:#faf7ff;
+      --primary:#7c3aed;
+      --primary-dark:#5b21b6;
+      --card:#ffffff;
+      --muted:#666;
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial;
+      background:var(--bg);
+      color:#222;
+      padding:18px;
+      -webkit-font-smoothing:antialiased;
+      padding-bottom: 80px;
+    }
+    header{
+      text-align:center;
+      padding:18px 8px;
+    }
+    h1{margin:0; color:var(--primary); font-size:28px}
+    .container{max-width:980px; margin:8px auto;}
+    .card{
+      background:var(--card);
+      padding:12px 14px;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(30,30,60,0.06);
+      margin-bottom:14px;
+    }
+    label{display:block; font-size:14px; margin-bottom:6px; color:var(--muted)}
+    input[type="text"], input[type="number"], input[type="date"], select{
+      width:100%; padding:8px 10px; border-radius:8px; border:1px solid #e6e6f0; margin-bottom:8px;
+      font-size:14px;
+    }
+    #nomeReceita {
+        border: 2px solid var(--primary);
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .row{display:flex; gap:10px; align-items:center;}
+    .row > *{flex:1}
+    button{
+      background:var(--primary); color:white; border:none; padding:10px 12px; border-radius:10px; cursor:pointer;
+    }
+    button.secondary{background:#eee; color:#333}
+    button.danger{background:var(--danger); color:white; margin-left: 5px;}
+    .small{padding:6px 8px; font-size:13px; border-radius:8px}
+    table{width:100%; border-collapse:collapse; margin-top:8px}
+    th,td{padding:8px; border:1px solid #f0edf8; text-align:left; font-size:14px}
+    
+    nav{display:flex; gap:5px; margin-bottom:14px; overflow-x: auto; padding-bottom: 5px;}
+    nav button { white-space: nowrap; flex: 1; font-size: 13px; padding: 10px 5px; }
+    
+    .muted{color:var(--muted); font-size:13px}
+    footer{margin-top:18px; text-align:center; color:#888; font-size:13px}
+    
+    .ing-row {
+        display: flex; 
+        gap: 5px; 
+        margin-bottom: 8px; 
+        align-items: center;
+        background: #fdfdfd;
+        padding: 5px;
+        border-bottom: 1px dashed #eee;
+    }
+    .ing-name { flex: 2; font-size: 14px; }
+    .ing-input { width: 80px; }
+    .ing-select { width: 90px; }
+    
+    /* Estilos da Tela de Ajuda */
+    .tutorial-box {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background: #f9fafb;
+    }
+    .tutorial-step { font-weight: bold; color: var(--primary); }
+    .tutorial-icon { font-size: 20px; vertical-align: middle; }
+
+    @media (max-width:600px){ .row{flex-direction:column} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Doce Inclusão</h1>
+    <div class="muted">Sistema rápido para planejar ingredientes e custos</div>
+  </header>
+
+  <main class="container">
+    <nav>
+      <button onclick="show('telaInsumos')">1. Insumos</button>
+      <button onclick="show('telaReceitas')">2. Receitas</button>
+      <button onclick="show('telaPlanejamento')">3. Planejamento</button>
+      <button onclick="show('telaAjuda')" style="background: #4b5563;">4. Ajuda</button>
+    </nav>
+
+    <section id="telaInsumos" class="card" aria-live="polite">
+      <h2>Insumos (ingredientes)</h2>
+      <p class="muted">Cadastre o preço pago pela embalagem e o tamanho dela.</p>
+
+      <div>
+        <label for="insumoNome">Nome do insumo</label>
+        <input id="insumoNome" type="text" placeholder="Ex: Fermento em pó">
+
+        <div class="row">
+            <div>
+                <label for="insumoPreco">Preço Pago (R$)</label>
+                <input id="insumoPreco" type="number" step="0.01" placeholder="ex: 3.00">
+            </div>
+            <div>
+                <label for="insumoQtdEmb">Peso/Qtd Total</label>
+                <input id="insumoQtdEmb" type="number" step="0.01" placeholder="ex: 200">
+            </div>
+            <div>
+                <label for="insumoUnidade">Unidade da Embalagem</label>
+                <select id="insumoUnidade">
+                    <option value="g">Gramas (g)</option>
+                    <option value="kg">Quilo (kg)</option>
+                    <option value="ml">Mililitro (ml)</option>
+                    <option value="l">Litro (l)</option>
+                    <option value="un">Unidade (un)</option>
+                </select>
+            </div>
+        </div>
+
+        <button onclick="saveInsumo()">Salvar Insumo</button>
+      </div>
+
+      <h3 style="margin-top:12px">Lista de insumos</h3>
+      <div id="listaInsumos" class="muted">Nenhum insumo cadastrado.</div>
+    </section>
+
+    <section id="telaReceitas" class="card" style="display:none">
+      <h2>Receitas</h2>
+      <p class="muted">Crie receitas. Escolha a unidade correta para cada ingrediente usado.</p>
+
+      <form id="formReceita">
+        <input type="hidden" id="editarReceitaIndex" value="">
+        
+        <label for="nomeReceita">Nome da receita</label>
+        <input id="nomeReceita" type="text" placeholder="Ex: Bolo de Cenoura">
+
+        <div id="ingredientesList" style="margin-top: 15px;"></div>
+
+        <div class="row" style="margin-top:8px">
+          <button type="submit">Salvar Receita</button>
+          <button type="button" class="secondary" onclick="formReset()">Limpar</button>
+        </div>
+      </form>
+
+      <h3 style="margin-top:12px">Receitas cadastradas</h3>
+      <table aria-live="polite">
+        <thead><tr><th>Nome</th><th>Custo Atualizado (R$)</th><th>Ações</th></tr></thead>
+        <tbody id="tabelaReceitas"><tr><td colspan="3" class="muted">Nenhuma receita</td></tr></tbody>
+      </table>
+    </section>
+
+    <section id="telaPlanejamento" class="card" style="display:none">
+      <h2>Planejamento</h2>
+      
+      <div class="row">
+          <div>
+            <label>Data prevista</label>
+            <input id="dataPlanejamento" type="date">
+          </div>
+          <div>
+            <label>Dia da Semana</label>
+            <select id="diaSemana">
+                <option value="">Selecione...</option>
+                <option value="Segunda">Segunda-feira</option>
+                <option value="Terça">Terça-feira</option>
+                <option value="Quarta">Quarta-feira</option>
+                <option value="Quinta">Quinta-feira</option>
+                <option value="Sexta">Sexta-feira</option>
+                <option value="Sábado">Sábado</option>
+                <option value="Domingo">Domingo</option>
+            </select>
+          </div>
+      </div>
+
+      <label>Receita</label>
+      <select id="selectReceitas"></select>
+
+      <label>Número de alunos (Receitas completas)</label>
+      <input id="numeroAlunos" type="number" min="1" value="10" placeholder="Quantas receitas serão feitas?">
+
+      <div style="margin-top:8px" class="row">
+        <button onclick="gerarLista()">Gerar lista de compras</button>
+        <button class="secondary" onclick="document.getElementById('resultado').innerHTML='';">Limpar</button>
+      </div>
+
+      <div id="resultado" style="margin-top:12px"></div>
+    </section>
+
+    <section id="telaAjuda" class="card" style="display:none">
+        <h2>📱 Como instalar o App</h2>
+        <div class="tutorial-box">
+            <h3>🍎 No iPhone (iOS)</h3>
+            <p><span class="tutorial-step">1.</span> No Safari, toque em <strong>Compartilhar</strong> <span class="tutorial-icon">📤</span>.</p>
+            <p><span class="tutorial-step">2.</span> Role até <strong>"Adicionar à Tela de Início"</strong> <span class="tutorial-icon">➕</span>.</p>
+            <p><span class="tutorial-step">3.</span> Toque em <strong>Adicionar</strong>.</p>
+        </div>
+        <div class="tutorial-box">
+            <h3>🤖 No Android (Chrome)</h3>
+            <p><span class="tutorial-step">1.</span> Toque nos <strong>3 pontinhos</strong> <span class="tutorial-icon">⋮</span>.</p>
+            <p><span class="tutorial-step">2.</span> Toque em <strong>"Instalar aplicativo"</strong>.</p>
+        </div>
+
+        <hr style="margin: 15px 0; border:0; border-top:1px solid #eee;">
+
+        <h2>❓ Como usar o Sistema</h2>
+        <p><strong>Passo 1 (Insumos):</strong> Pegue sua nota fiscal e cadastre todos os ingredientes que comprou, colocando o preço total e o tamanho da embalagem.</p>
+        <p><strong>Passo 2 (Receitas):</strong> Monte suas receitas. O sistema vai puxar o preço do passo 1. Se o preço do mercado subir, basta mudar no Passo 1 que tudo atualiza!</p>
+        <p><strong>Passo 3 (Planejamento):</strong> Vai ter aula? Selecione a receita e quantos alunos vão participar. O sistema gera a lista de compras exata.</p>
+
+        <hr style="margin: 20px 0; border:0; border-top:1px solid #eee;">
+
+        <div style="text-align:center; padding-bottom:10px;">
+            <h3>Acompanhe o Projeto</h3>
+            
+            <a href="https://www.instagram.com/p/DLVWER8PBrO/?hl=en" target="_blank" style="display:block; background:#E1306C; color:white; text-decoration:none; padding:12px; border-radius:8px; font-weight:bold; margin-bottom:15px;">
+               📸 Ver Projeto Doce Inclusão no Instagram
+            </a>
+
+            <p class="muted" style="font-size:12px;">
+                Desenvolvido por<br>
+                <a href="https://instagram.com/junioroliveira0803" target="_blank" style="color:var(--primary); font-weight:bold; text-decoration:none;">
+                    @junioroliveira0803
+                </a>
+            </p>
+        </div>
+
+    </section>
+
+    <footer>
+      DOCE INCLUSÃO — ferramenta MVP • Dados salvos localmente no navegador (localStorage)
+    </footer>
+  </main>
+
+<script>
+const DB = {
+  insumos: () => JSON.parse(localStorage.getItem('insumos')||'[]'),
+  receitas: () => JSON.parse(localStorage.getItem('receitas')||'[]'),
+  saveInsumos: (arr)=> localStorage.setItem('insumos', JSON.stringify(arr)),
+  saveReceitas: (arr)=> localStorage.setItem('receitas', JSON.stringify(arr))
+}
+
+function show(id){
+  ['telaInsumos','telaReceitas','telaPlanejamento','telaAjuda'].forEach(x=>{
+    document.getElementById(x).style.display = x===id ? 'block' : 'none';
+  });
+  if(id==='telaReceitas') renderReceitasForm();
+  if(id==='telaPlanejamento') populateSelectReceitas();
+}
+
+/* ======= LÓGICA DE CONVERSÃO ======= */
+function converterParaBase(qtd, unidade) {
+    if (unidade === 'kg' || unidade === 'l') return qtd * 1000;
+    return qtd; 
+}
+
+function calcularCustoBase(preco, qtdEmb, unidadeEmb) {
+    const qtdEmBase = converterParaBase(qtdEmb, unidadeEmb);
+    if(qtdEmBase === 0) return 0;
+    return preco / qtdEmBase;
+}
+
+/* ======= Insumos ======= */
+function renderInsumos(){
+  const insumos = DB.insumos();
+  const container = document.getElementById('listaInsumos');
+  if(insumos.length===0){ container.innerHTML = '<div class="muted">Nenhum insumo cadastrado.</div>'; return; }
+  container.innerHTML = '';
+  insumos.forEach((i,idx)=>{
+    const div = document.createElement('div');
+    div.style.padding='8px 0';
+    div.style.borderBottom='1px solid #eee';
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><strong>${i.nome}</strong> — R$ ${Number(i.preco).toFixed(2)} (${i.qtdEmb} ${i.unidade})</span>
+          <div>
+            <button class="small" onclick="editInsumo(${idx})">Editar</button>
+            <button class="small danger" onclick="deleteInsumo(${idx})">X</button>
+          </div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function saveInsumo(){
+  const nome = document.getElementById('insumoNome').value.trim();
+  const preco = parseFloat(document.getElementById('insumoPreco').value);
+  const qtdEmb = parseFloat(document.getElementById('insumoQtdEmb').value);
+  const unidade = document.getElementById('insumoUnidade').value;
+
+  if(!nome || isNaN(preco) || isNaN(qtdEmb)){ alert('Preencha todos os campos.'); return; }
+
+  const custoPorBase = calcularCustoBase(preco, qtdEmb, unidade);
+
+  const insumos = DB.insumos();
+  const foundIndex = insumos.findIndex(i=>i.nome.toLowerCase()===nome.toLowerCase());
+  
+  const novoInsumo = {nome, preco, qtdEmb, unidade, custoPorBase};
+
+  if(foundIndex >= 0){
+    if(confirm('Insumo já existe. Atualizar?')){
+        insumos[foundIndex] = novoInsumo;
+    } else { return; }
+  } else {
+    insumos.push(novoInsumo);
+  }
+
+  DB.saveInsumos(insumos);
+  
+  document.getElementById('insumoNome').value=''; 
+  document.getElementById('insumoPreco').value='';
+  document.getElementById('insumoQtdEmb').value='';
+  
+  renderInsumos();
+  listarReceitasTabela();
+  alert('Insumo salvo.');
+}
+
+function editInsumo(index){
+  const insumos = DB.insumos();
+  const i = insumos[index];
+  if(!i) return;
+  document.getElementById('insumoNome').value = i.nome;
+  document.getElementById('insumoPreco').value = i.preco;
+  document.getElementById('insumoQtdEmb').value = i.qtdEmb;
+  document.getElementById('insumoUnidade').value = i.unidade;
+  show('telaInsumos');
+}
+
+function deleteInsumo(index){
+    if(confirm("Deseja excluir este insumo?")){
+        const insumos = DB.insumos();
+        insumos.splice(index, 1);
+        DB.saveInsumos(insumos);
+        renderInsumos();
+        renderReceitasForm();
+    }
+}
+
+/* ======= Receitas ======= */
+function renderReceitasForm(){
+  const insumos = DB.insumos();
+  const container = document.getElementById('ingredientesList');
+  container.innerHTML = '';
+  if(insumos.length===0){
+    container.innerHTML = '<div class="muted">Cadastre insumos primeiro.</div>';
+    document.getElementById('nomeReceita').disabled = true;
+    return;
+  }
+  document.getElementById('nomeReceita').disabled=false;
+
+  container.innerHTML = '<div style="display:flex; gap:5px; margin-bottom:5px; font-size:12px; color:#666;"><span style="flex:2">Ingrediente</span><span style="width:80px">Qtd</span><span style="width:90px">Unidade</span></div>';
+
+  insumos.forEach((insumo, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'ing-row';
+    
+    let options = '';
+    if(insumo.unidade === 'un'){
+        options = '<option value="un">un</option>';
+    } else if (insumo.unidade === 'l' || insumo.unidade === 'ml') {
+        options = '<option value="ml">ml</option><option value="l">L</option>';
+    } else {
+        options = '<option value="g">g</option><option value="kg">kg</option>';
+    }
+
+    row.innerHTML = `
+      <div class="ing-name">${insumo.nome}</div>
+      <input type="number" min="0" step="0.01" placeholder="0" data-i="${idx}" class="ing-input input-qtd">
+      <select class="ing-select input-unidade" data-i="${idx}">
+         ${options}
+      </select>
+    `;
+    container.appendChild(row);
+  });
+  listarReceitasTabela();
+}
+
+document.getElementById('formReceita').addEventListener('submit', function(e){
+  e.preventDefault();
+  const nome = document.getElementById('nomeReceita').value.trim();
+  if(!nome){ alert('Informe nome da receita'); return; }
+  
+  const inputsQtd = Array.from(document.querySelectorAll('.input-qtd'));
+  const inputsUnid = Array.from(document.querySelectorAll('.input-unidade'));
+  
+  let ingredientes = [];
+
+  inputsQtd.forEach((inp, index)=>{
+    const q = parseFloat(inp.value) || 0;
+    if(q > 0){
+      const insIndex = parseInt(inp.dataset.i);
+      const unidadeUsada = inputsUnid[index].value; 
+      ingredientes.push({ 
+          insumo_index: insIndex, 
+          quantidade: q, 
+          unidade: unidadeUsada
+      });
+    }
+  });
+
+  if(ingredientes.length===0){ alert('Adicione pelo menos um ingrediente.'); return; }
+
+  const receitas = DB.receitas();
+  const editarIndex = document.getElementById('editarReceitaIndex').value;
+  const nova = { nome, ingredientes }; 
+  
+  if(editarIndex!=='') receitas[parseInt(editarIndex)] = nova;
+  else receitas.push(nova);
+  
+  DB.saveReceitas(receitas);
+  formReset();
+  listarReceitasTabela();
+  alert('Receita salva.');
+});
+
+function formReset(){
+  document.getElementById('formReceita').reset();
+  document.getElementById('editarReceitaIndex').value='';
+  renderReceitasForm();
+}
+
+function listarReceitasTabela(){
+  const receitas = DB.receitas();
+  const insumos = DB.insumos(); 
+  const tbody = document.getElementById('tabelaReceitas');
+  tbody.innerHTML = '';
+  
+  if(receitas.length===0){ tbody.innerHTML = '<tr><td colspan="3" class="muted">Nenhuma receita</td></tr>'; return; }
+  
+  receitas.forEach((r,idx)=>{
+    let custoDinamico = 0;
+    r.ingredientes.forEach(ing => {
+        const insAtual = insumos[ing.insumo_index];
+        if(insAtual) {
+            const custoBaseAtual = calcularCustoBase(insAtual.preco, insAtual.qtdEmb, insAtual.unidade);
+            const qtdNaBase = converterParaBase(ing.quantidade, ing.unidade);
+            custoDinamico += (qtdNaBase * custoBaseAtual);
+        }
+    });
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.nome}</td>
+      <td>R$ ${custoDinamico.toFixed(2)}</td>
+      <td>
+        <button class="small" onclick="editarReceita(${idx})">Editar</button>
+        <button class="small danger" onclick="deleteReceita(${idx})">X</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  populateSelectReceitas();
+}
+
+function editarReceita(index){
+  const receitas = DB.receitas();
+  const r = receitas[index];
+  if(!r) return;
+  document.getElementById('nomeReceita').value = r.nome;
+  document.getElementById('editarReceitaIndex').value = index;
+  
+  renderReceitasForm();
+  setTimeout(()=>{
+    r.ingredientes.forEach(ing=>{
+      const inputQtd = document.querySelector(`.input-qtd[data-i="${ing.insumo_index}"]`);
+      const inputUnid = document.querySelector(`.input-unidade[data-i="${ing.insumo_index}"]`);
+      if(inputQtd && inputUnid) {
+          inputQtd.value = ing.quantidade;
+          inputUnid.value = ing.unidade;
+      }
+    });
+  }, 50);
+  show('telaReceitas');
+}
+
+function deleteReceita(index){
+    if(confirm("Deseja excluir esta receita?")){
+        const receitas = DB.receitas();
+        receitas.splice(index, 1);
+        DB.saveReceitas(receitas);
+        listarReceitasTabela();
+    }
+}
+
+/* ======= Planejamento ======= */
+function populateSelectReceitas(){
+  const select = document.getElementById('selectReceitas');
+  select.innerHTML = '';
+  const receitas = DB.receitas();
+  if(receitas.length===0){ select.innerHTML = '<option value="">(cadastre receitas)</option>'; return; }
+  receitas.forEach((r,idx)=>{
+    const opt = document.createElement('option'); 
+    opt.value = idx; 
+    opt.text = r.nome; 
+    select.appendChild(opt);
+  });
+}
+
+function gerarLista(){
+  const idx = parseInt(document.getElementById('selectReceitas').value);
+  const numAlunos = parseInt(document.getElementById('numeroAlunos').value) || 0;
+  const data = document.getElementById('dataPlanejamento').value;
+  const dia = document.getElementById('diaSemana').value;
+
+  if(isNaN(idx) || !DB.receitas()[idx]){ alert('Selecione uma receita.'); return; }
+  if(numAlunos<=0){ alert('Informe número de alunos.'); return; }
+
+  const receita = DB.receitas()[idx];
+  const insumos = DB.insumos(); 
+  const multiplicador = numAlunos; 
+
+  const agreg = {};
+  
+  receita.ingredientes.forEach(ing=>{
+    const insAtual = insumos[ing.insumo_index];
+    if(!insAtual) return;
+
+    const custoBaseAtual = calcularCustoBase(insAtual.preco, insAtual.qtdEmb, insAtual.unidade);
+    const qtdNaBase = converterParaBase(ing.quantidade, ing.unidade);
+    const custoItemTotal = qtdNaBase * custoBaseAtual;
+    
+    const qtdTotal = ing.quantidade * multiplicador;
+    const key = insAtual.nome + ing.unidade; 
+    
+    if(!agreg[key]) {
+        agreg[key] = { 
+            nome: insAtual.nome, 
+            total: 0, 
+            unidade: ing.unidade, 
+            custoTotal: 0
+        };
+    }
+    agreg[key].total += qtdTotal;
+    agreg[key].custoTotal += (custoItemTotal * multiplicador);
+  });
+
+  let custoTotalGeral = 0;
+  let linhasHTML = '';
+  
+  Object.values(agreg).forEach(item => {
+      custoTotalGeral += item.custoTotal;
+      linhasHTML += `<tr>
+        <td>${item.nome}</td>
+        <td>${parseFloat(item.total.toFixed(3))} ${item.unidade}</td>
+        <td>R$ ${item.custoTotal.toFixed(2)}</td>
+      </tr>`;
+  });
+
+  let html = `<h3>Plano: ${receita.nome}</h3>`;
+  html += `<p class="muted"><strong>Data:</strong> ${data || '--/--'} (${dia || '-'}) • <strong>Qtd. Receitas/Alunos:</strong> ${numAlunos}</p>`;
+  html += `<table><thead><tr><th>Produto</th><th>Total</th><th>Custo Atual</th></tr></thead><tbody>`;
+  html += linhasHTML;
+  html += `</tbody></table>`;
+  html += `<h4 style="margin-top:12px; text-align:right; color:var(--primary)">Custo Total Previsto: R$ ${custoTotalGeral.toFixed(2)}</h4>`;
+  
+  html += `<div style="margin-top:12px">
+    <button onclick="window.print()">Imprimir Lista</button>
+  </div>`;
+
+  document.getElementById('resultado').innerHTML = html;
+}
+
+window.addEventListener('load', ()=>{ 
+    show('telaInsumos'); 
+    renderInsumos(); 
+});
+</script>
+</body>
+</html>

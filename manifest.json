@@ -1,0 +1,21 @@
+{
+  "name": "Sistema Doce Inclusão",
+  "short_name": "Doce Inclusão",
+  "description": "Planejamento de receitas, custos e lista de compras para o projeto culinário da APAE.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#faf7ff",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
